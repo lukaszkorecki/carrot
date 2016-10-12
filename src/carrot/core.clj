@@ -84,7 +84,7 @@
 (defn report-metrics [metrics]
   (for [metric metrics]
     (let [[k v] metric]
-      (log/infof ">> %s -> %s\n" k v)
+      (log/warnf ">> %s -> %s\n" k v)
       (s/gauge k v))))
 
 (def scheduler-pool (at/mk-pool))
