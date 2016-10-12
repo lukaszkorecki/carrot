@@ -2,7 +2,7 @@
   (:gen-class)
   (require [cheshire.core :as json]
            [org.httpkit.client :as http]
-           [clj-statsd :as statsd]))
+           [clj-statsd :as s]))
 
 (def rabbit-port (or
                   (System/getenv "RABBIT_PORT")
@@ -19,6 +19,17 @@
 (def rabbit-pass (or
                   (System/getenv "RABBIT_PASS")
                   "p4ssw0rd"))
+
+(def statsd-host (or
+                  (System/getenv "STATSD_HOST")
+                  "127.0.0.1"))
+
+(def statsd-port (or
+                  (System/getenv "STATSD_PORT")
+                  8125))
+
+
+(s/setup statsd-host statsd-port)
 
 
 (defn rabbit-api-url [path]
@@ -54,12 +65,29 @@
                     :fd_total
                     :fd_used])))
 
-
-(defn report-metrics []
+(defn fetch-metrics []
   (let [qm (queue-metrics)
-        sm (server-metrics)]
+        sm (server-metrics)
 
-    (for [m qm])))
+        queues (map
+                (fn [i]
+                  [(format "amqp_queues.%s" (-> i :name name))
+                   (-> i :messages)])
+                qm)
+
+        stats (map
+               (fn [i]
+                 [(format "amq_stats.%s" (-> i first name))
+                  (last i)])
+               sm)]
+
+    (concat queues stats)))
+
+(defn report-metrics [metrics]
+  (for [metric metrics]
+    (let [[k v] metric]
+      (printf ">> %s -> %s\n" k v)
+      (s/gauge k v))))
 
 (defn -main
   "I don't do a whole lot ... yet."
