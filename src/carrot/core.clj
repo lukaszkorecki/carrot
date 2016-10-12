@@ -82,6 +82,7 @@
     (concat queues stats)))
 
 (defn report-metrics [metrics]
+  (log/warnf "reporting %s metrics" (count metrics))
   (for [metric metrics]
     (let [[k v] metric]
       (log/warnf ">> %s -> %s\n" k v)
@@ -102,7 +103,6 @@
 (defn -main
   [& args]
   (log/warn "let's do this")
+  (log/warnf "mem size: %s" (/ (.totalMemory (Runtime/getRuntime)) 1024))
   (s/setup statsd-host statsd-port)
-  (start! (fn []
-            (log/warn "TICK")
-            (report-metrics (fetch-metrics)))))
+  (start! (fn [] (report-metrics (fetch-metrics)))))
