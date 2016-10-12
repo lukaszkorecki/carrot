@@ -2,7 +2,8 @@
   (:gen-class)
   (require [cheshire.core :as json]
            [org.httpkit.client :as http]
-           [clj-statsd :as s]))
+           [clj-statsd :as s]
+           [overtone.at-at :as at]))
 
 (def rabbit-port (or
                   (System/getenv "RABBIT_PORT")
@@ -89,7 +90,22 @@
       (printf ">> %s -> %s\n" k v)
       (s/gauge k v))))
 
+(def scheduler-pool (at/mk-pool))
+
+(def scheduled (atom nil))
+
+(defn start! [cb]
+  (reset! scheduled (at/every 5000
+                              cb
+                              scheduler-pool)))
+
+(defn stop! []
+  (at/stop @scheduled))
+
 (defn -main
-  "I don't do a whole lot ... yet."
+
   [& args]
-  (println "Hello, World!"))
+  (println "let's do this")
+  (start! (fn []
+            (print ".")
+            (report-metrics (fetch-metrics))))
