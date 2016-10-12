@@ -3,7 +3,8 @@
   (require [cheshire.core :as json]
            [org.httpkit.client :as http]
            [clj-statsd :as s]
-           [overtone.at-at :as at]))
+           [overtone.at-at :as at]
+           [clojure.tools.logging :as log]))
 
 (def rabbit-port (or
                   (System/getenv "RABBIT_PORT")
@@ -28,10 +29,6 @@
 (def statsd-port (or
                   (System/getenv "STATSD_PORT")
                   8125))
-
-
-(s/setup statsd-host statsd-port)
-
 
 (defn rabbit-api-url [path]
   (format "http://%s:%s/%s" rabbit-host rabbit-port path))
@@ -87,7 +84,7 @@
 (defn report-metrics [metrics]
   (for [metric metrics]
     (let [[k v] metric]
-      (printf ">> %s -> %s\n" k v)
+      (log/infof ">> %s -> %s\n" k v)
       (s/gauge k v))))
 
 (def scheduler-pool (at/mk-pool))
@@ -104,7 +101,8 @@
 
 (defn -main
   [& args]
-  (println "let's do this")
+  (log/warn "let's do this")
+  (s/setup statsd-host statsd-port)
   (start! (fn []
-            (print ".")
+            (log/warn "TICK")
             (report-metrics (fetch-metrics)))))
