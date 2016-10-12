@@ -103,9 +103,8 @@
   (at/stop @scheduled))
 
 (defn -main
-
   [& args]
   (println "let's do this")
   (start! (fn []
             (print ".")
-            (report-metrics (fetch-metrics))))
+            (report-metrics (fetch-metrics)))))
