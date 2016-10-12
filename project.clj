@@ -9,5 +9,4 @@
                  [cheshire "5.6.1"]
                  [overtone/at-at "1.2.0"]]
   :main ^:skip-aot carrot.core
-  :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :target-path "target/%s")
