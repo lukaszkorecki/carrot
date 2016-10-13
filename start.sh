@@ -5,4 +5,4 @@ java -jar $jar \
      -DAggressiveOpts=true \
      -DUseCompressedOops=true \
      -server \
-     -Xmx20m -Xms20m -XX:NewSize=256k -mx20m -XshowSettings:vm
+     -XX:NewSize=12m -XX:MaxNewSize=12m -XX:SurvivorRatio=8 -Xms24m -Xmx24m  -Xgc:genpar  -XXfullCompaction
